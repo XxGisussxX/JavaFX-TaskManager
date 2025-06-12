@@ -102,7 +102,7 @@ public class CalendarioService {
                 ResultSet generatedKeys = pstmt.getGeneratedKeys();
                 if (generatedKeys.next()) {
                     // Actualizar el ID del usuario con el generado por la BD
-                    // usuario.setId(generatedKeys.getInt(1)); // Si agregas setter para ID
+                     usuario.setId(generatedKeys.getInt(1)); // Si agregas setter para ID
                 }
                 System.out.println("✅ Usuario creado exitosamente: " + usuario.getNombre());
                 return true;
@@ -173,8 +173,7 @@ public class CalendarioService {
             pstmt.setDate(4, new java.sql.Date(tarea.getFechaFin().getTime()));
             pstmt.setString(5, tarea.getPrioridad().name());
             pstmt.setString(6, tarea.getEstado().name());
-            pstmt.setDate(7, tarea.getRecordatorio() != null ?
-                    new java.sql.Date(tarea.getRecordatorio().getTime()) : null);
+            pstmt.setDate(7, tarea.getRecordatorio() != null ? new java.sql.Date(tarea.getRecordatorio().getTime()) : null);
             pstmt.setInt(8, usuarioId);
 
             int filasAfectadas = pstmt.executeUpdate();

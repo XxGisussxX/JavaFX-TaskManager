@@ -1,8 +1,187 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.CalendarioController">
-    <Pane fx:id="calendarioPane" prefWidth="800.0" prefHeight="600.0" layoutX="10.0" layoutY="10.0"/>
-</AnchorPane>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controller.CalendarioController">
+
+    <!-- Barra superior con título y controles -->
+    <top>
+        <VBox styleClass="header-section">
+            <!-- Título principal -->
+            <HBox alignment="CENTER" styleClass="title-bar">
+                <padding>
+                    <Insets bottom="10.0" left="20.0" right="20.0" top="15.0" />
+                </padding>
+                <Label text="📅 Gestor de Tareas y Calendario" styleClass="main-title">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+            </HBox>
+
+            <!-- Barra de herramientas -->
+            <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="toolbar">
+                <padding>
+                    <Insets bottom="15.0" left="20.0" right="20.0" top="10.0" />
+                </padding>
+
+                <Button fx:id="btnNuevaTarea" text="➕ Nueva Tarea" styleClass="btn-primary"
+                        onAction="#abrirFormularioTarea" />
+
+                <Button fx:id="btnVerTareas" text="📋 Ver Tareas" styleClass="btn-secondary"
+                        onAction="#abrirListaTareas" />
+
+                <Separator orientation="VERTICAL" />
+
+                <Label text="Vista:" />
+                <ComboBox fx:id="cbVistaCalendario" value="Mes" onAction="#cambiarVistaCalendario">
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <String fx:value="Día" />
+                            <String fx:value="Semana" />
+                            <String fx:value="Mes" />
+                            <String fx:value="Año" />
+                        </FXCollections>
+                    </items>
+                </ComboBox>
+
+                <Separator orientation="VERTICAL" />
+
+                <!-- Campo de búsqueda -->
+                <TextField fx:id="txtBuscar" promptText="🔍 Buscar tareas..."
+                           onKeyReleased="#buscarTareas" prefWidth="200.0" />
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <!-- Información del usuario -->
+                <Label fx:id="lblUsuario" text="👤 Usuario: No conectado" styleClass="user-info" />
+
+                <Button fx:id="btnPerfil" text="⚙️" styleClass="btn-icon"
+                        onAction="#abrirPerfil" />
+            </HBox>
+
+            <Separator />
+        </VBox>
+    </top>
+
+    <!-- Área principal del calendario -->
+    <center>
+        <StackPane>
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </padding>
+
+            <!-- Contenedor del calendario -->
+            <Pane fx:id="calendarioPane" />
+
+            <!-- Panel de carga (inicialmente oculto) -->
+            <VBox fx:id="panelCarga" alignment="CENTER" visible="false"
+                  style="-fx-background-color: rgba(255,255,255,0.8);">
+                <ProgressIndicator />
+                <Label text="Cargando calendario..." />
+            </VBox>
+        </StackPane>
+    </center>
+
+    <!-- Panel lateral derecho para información adicional -->
+    <right>
+        <VBox fx:id="panelLateral" prefWidth="280.0" styleClass="side-panel"
+              visible="true" managed="true">
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </padding>
+
+            <!-- Resumen de tareas -->
+            <VBox styleClass="info-section">
+                <Label text="📊 Resumen de Tareas" styleClass="section-title">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Label>
+
+                <Separator />
+
+                <VBox fx:id="contenedorEstadisticas" spacing="8.0">
+                    <padding>
+                        <Insets top="10.0" />
+                    </padding>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <Label text="⏳ Pendientes:" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblPendientes" text="0" styleClass="stat-number" />
+                    </HBox>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <Label text="🔄 En Progreso:" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblEnProgreso" text="0" styleClass="stat-number" />
+                    </HBox>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <Label text="✅ Completadas:" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblCompletadas" text="0" styleClass="stat-number" />
+                    </HBox>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <Label text="🔴 Vencidas:" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblVencidas" text="0" styleClass="stat-number" />
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <Separator />
+
+            <!-- Próximas tareas -->
+            <VBox styleClass="info-section">
+                <Label text="⏰ Próximas Tareas" styleClass="section-title">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Label>
+
+                <Separator />
+
+                <ListView fx:id="listaProximasTareas" prefHeight="200.0">
+                    <padding>
+                        <Insets top="5.0" />
+                    </padding>
+                </ListView>
+            </VBox>
+
+            <Region VBox.vgrow="ALWAYS" />
+
+            <!-- Botón para ocultar/mostrar panel -->
+            <Button fx:id="btnTogglePanel" text="◀ Ocultar Panel" styleClass="btn-toggle"
+                    onAction="#togglePanelLateral" />
+        </VBox>
+    </right>
+
+    <!-- Barra de estado inferior -->
+    <bottom>
+        <HBox alignment="CENTER_LEFT" styleClass="status-bar">
+            <padding>
+                <Insets bottom="8.0" left="15.0" right="15.0" top="8.0" />
+            </padding>
+
+            <Label fx:id="lblEstado" text="✅ Listo" />
+
+            <Region HBox.hgrow="ALWAYS" />
+
+            <Label fx:id="lblFechaActual" text="" />
+        </HBox>
+    </bottom>
+
+    <!-- Estilos CSS -->
+    <stylesheets>
+
+    </stylesheets>
+</BorderPane>

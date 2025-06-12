@@ -5,12 +5,11 @@ import java.util.List;
 
 public class Calendario {
     private List<Tarea> tareas;
-    private String archivoTareas; // Archivo donde se guardan las tareas
 
 
-    public Calendario(String archivoTareas) {
+
+    public Calendario() {
         this.tareas = new ArrayList<>();
-        this.archivoTareas = archivoTareas;
     }
 
 
@@ -100,7 +99,6 @@ public class Calendario {
         }
 
         System.out.println("\n📋 === LISTADO DE TAREAS ===");
-        System.out.println("📄 Archivo: " + (archivoTareas != null ? archivoTareas : "Sin archivo"));
         for (Tarea tarea : tareas) {
             System.out.println(tarea);
             System.out.println("─".repeat(50));

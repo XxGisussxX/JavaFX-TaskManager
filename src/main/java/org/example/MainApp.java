@@ -11,8 +11,9 @@ public class MainApp extends Application {
     public void start(Stage primaryStage) {
         try {
             // Cargar la vista del formulario de tareas (temporalmente)
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CrearTarea.fxml"));
-            Scene scene = new Scene(loader.load(), 520, 700);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/VistaPrincipal.fxml"));
+            Scene scene = new Scene(loader.load(), 1280, 720);
+
 
             // Configurar el ícono de la aplicación
             var iconURL = getClass().getResource("/images/logo.png");
@@ -22,7 +23,7 @@ public class MainApp extends Application {
                 System.out.println("⚠️ Icon image not found, using default icon");
             }
 
-            primaryStage.setTitle("Gestor de Tareas - Crear/Editar");
+            primaryStage.setTitle("Gestor de Tareas");
             primaryStage.setScene(scene);
             primaryStage.setResizable(true);
             primaryStage.setMinWidth(520);

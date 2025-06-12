@@ -42,6 +42,8 @@ public class CrearTareaController implements Initializable {
     private String emailUsuarioActual = "admin@test.com"; // Temporal, luego vendrá del login
     private Tarea tareaEnEdicion = null; // Para modo edición
     private ObservableList<String> listaTareasObservable;
+    private CalendarioController calendarioController;
+    private Usuario usuarioActual;
 
     // ==================== INICIALIZACIÓN ====================
 
@@ -156,28 +158,90 @@ public class CrearTareaController implements Initializable {
                 // Modo edición
                 tarea.setId(tareaEnEdicion.getId());
                 exito = calendarioService.actualizarTarea(tarea);
-                mostrarMensaje(exito ? "✅ Tarea actualizada correctamente" : "❌ Error al actualizar tarea",
-                        exito ? Color.GREEN : Color.RED);
+
+                if (exito) {
+                    mostrarMensaje("✅ Tarea actualizada correctamente", Color.GREEN);
+                    System.out.println("✅ Tarea actualizada exitosamente");
+                } else {
+                    mostrarMensaje("❌ Error al actualizar tarea", Color.RED);
+                    System.err.println("❌ Error al actualizar tarea en el servicio");
+                }
             } else {
                 // Modo creación
                 exito = calendarioService.crearTarea(tarea, emailUsuarioActual);
-                mostrarMensaje(exito ? "✅ Tarea creada correctamente" : "❌ Error al crear tarea",
-                        exito ? Color.GREEN : Color.RED);
+
+                if (exito) {
+                    mostrarMensaje("✅ Tarea creada correctamente", Color.GREEN);
+                    System.out.println("✅ Tarea creada exitosamente");
+                } else {
+                    mostrarMensaje("❌ Error al crear tarea", Color.RED);
+                    System.err.println("❌ Error al crear tarea en el servicio");
+                }
             }
 
             if (exito) {
+                // Actualizar la lista inmediatamente después del guardado exitoso
                 cargarTareasEnLista();
+
+                // Notificar al controlador principal si existe
+                if (calendarioController != null) {
+                    try {
+                        // Llama al metodo de actualización si existe
+                        calendarioController.actualizarVistaTareas();
+                    } catch (Exception e) {
+                        // Si el metodo no existe, solo registra en log pero continúa
+                        System.out.println("ℹ️ Método actualizarVistaTareas() no implementado en CalendarioController");
+                    }
+                }
+
+                // Limpiar formulario solo si fue exitoso
                 limpiarFormulario();
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Error al guardar tarea: " + e.getMessage());
+            System.err.println("❌ Error inesperado al guardar tarea: " + e.getMessage());
+            e.printStackTrace(); // Para ver el stack trace completo
             mostrarMensaje("❌ Error inesperado al guardar la tarea", Color.RED);
         }
     }
 
     @FXML
     private void limpiarFormulario() {
+        // Solo limpiar sin mostrar mensaje si viene de un guardado exitoso
+        limpiarFormularioInterno(false);
+    }
+
+    @FXML
+    private void cancelar() {
+        if (tareaEnEdicion != null || !formularioVacio()) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirmar Cancelación");
+            alert.setHeaderText("¿Deseas cancelar?");
+            alert.setContentText("Se perderán los cambios no guardados.");
+
+            if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                limpiarFormularioInterno(true);
+                mostrarMensaje("❌ Operación cancelada", Color.GRAY);
+            }
+        } else {
+            limpiarFormularioInterno(true);
+            mostrarMensaje("📋 Formulario reiniciado", Color.BLUE);
+        }
+    }
+
+    @FXML
+    private void limpiarRecordatorio() {
+        dpRecordatorio.setValue(null);
+        mostrarMensaje("🔔 Recordatorio eliminado", Color.BLUE);
+    }
+
+    // ==================== MÉTODOS AUXILIARES DE LIMPIEZA ====================
+
+    /**
+     * Método interno para limpiar el formulario
+     * @param mostrarMensajeLimpieza Si debe mostrar mensaje de limpieza o no
+     */
+    private void limpiarFormularioInterno(boolean mostrarMensajeLimpieza) {
         txtNombre.clear();
         txtDescripcion.clear();
         dpFechaInicio.setValue(LocalDate.now());
@@ -190,33 +254,16 @@ public class CrearTareaController implements Initializable {
         lblTitulo.setText("📝 Crear Nueva Tarea");
         btnGuardar.setText("💾 Guardar");
 
-        lblMensaje.setVisible(false);
-        txtNombre.requestFocus();
-
-        System.out.println("🧹 Formulario limpiado");
-    }
-
-    @FXML
-    private void limpiarRecordatorio() {
-        dpRecordatorio.setValue(null);
-        mostrarMensaje("🔔 Recordatorio eliminado", Color.BLUE);
-    }
-
-    @FXML
-    private void cancelar() {
-        if (tareaEnEdicion != null || !formularioVacio()) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirmar Cancelación");
-            alert.setHeaderText("¿Deseas cancelar?");
-            alert.setContentText("Se perderán los cambios no guardados.");
-
-            if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-                limpiarFormulario();
-                mostrarMensaje("❌ Operación cancelada", Color.GRAY);
-            }
+        if (mostrarMensajeLimpieza) {
+            mostrarMensaje("🧹 Formulario limpiado", Color.BLUE);
+            System.out.println("🧹 Formulario limpiado por acción del usuario");
         } else {
-            limpiarFormulario();
+            // Solo ocultar mensaje si no debe mostrar mensaje de limpieza
+            lblMensaje.setVisible(false);
+            System.out.println("🧹 Formulario reiniciado después de guardado exitoso");
         }
+
+        txtNombre.requestFocus();
     }
 
     // ==================== MÉTODOS DE VALIDACIÓN ====================
@@ -335,6 +382,7 @@ public class CrearTareaController implements Initializable {
 
         } catch (Exception e) {
             System.err.println("❌ Error al cargar tareas en lista: " + e.getMessage());
+            e.printStackTrace(); // Para debugging
             mostrarMensaje("❌ Error al cargar la lista de tareas", Color.RED);
         }
     }
@@ -368,9 +416,32 @@ public class CrearTareaController implements Initializable {
         cargarTareasEnLista();
     }
 
+    // Setter para el controlador principal
+    public void setCalendarioController(CalendarioController calendarioController) {
+        this.calendarioController = calendarioController;
+    }
+
+    // Setter para el usuario actual
+    public void setUsuarioActual(Usuario usuarioActual) {
+        this.usuarioActual = usuarioActual;
+        if (usuarioActual != null && usuarioActual.getEmail() != null) {
+            this.emailUsuarioActual = usuarioActual.getEmail();
+            cargarTareasEnLista();
+        }
+    }
+
     // ==================== MÉTODOS PARA ESTADÍSTICAS ====================
 
     public void mostrarEstadisticas() {
         calendarioService.mostrarEstadisticas(emailUsuarioActual);
+    }
+
+    // ==================== METODO PÚBLICO PARA REFRESCAR LISTA ====================
+
+    /**
+     * Metodo público para actualizar la lista de tareas desde otros controladores
+     */
+    public void actualizarListaTareas() {
+        cargarTareasEnLista();
     }
 }
