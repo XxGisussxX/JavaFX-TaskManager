@@ -112,10 +112,10 @@ public class CrearTareaController implements Initializable {
         cbPrioridad.setValue(Prioridad.IMPORTANTE);
         cbEstado.setValue(Estado.PENDIENTE);
 
-        // Crear usuario de prueba si no existe
-        Usuario usuarioTest = new Usuario("Admin", emailUsuarioActual, "admin123");
-        calendarioService.crearUsuario(usuarioTest);
+        // ❌ Ya no se necesita crear usuario aquí
+        // ✅ Este controlador ahora solo usa el email desde SesionUsuario
     }
+
 
     private void configurarValidaciones() {
         // Validación en tiempo real para fechas
@@ -238,7 +238,7 @@ public class CrearTareaController implements Initializable {
     // ==================== MÉTODOS AUXILIARES DE LIMPIEZA ====================
 
     /**
-     * Método interno para limpiar el formulario
+     * Metodo interno para limpiar el formulario
      * @param mostrarMensajeLimpieza Si debe mostrar mensaje de limpieza o no
      */
     private void limpiarFormularioInterno(boolean mostrarMensajeLimpieza) {
@@ -365,7 +365,7 @@ public class CrearTareaController implements Initializable {
 
     private void cargarTareasEnLista() {
         try {
-            List<Tarea> tareas = calendarioService.obtenerTareas(emailUsuarioActual);
+            List<Tarea> tareas = calendarioService.obtenerTareas(SesionUsuario.emailActual);
             listaTareasObservable.clear();
 
             for (Tarea tarea : tareas) {

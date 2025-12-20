@@ -161,8 +161,8 @@ public class CalendarioController {
     }
 
     /**
-     * Método público para actualizar completamente la vista de tareas
-     * Este método puede ser llamado desde otros controladores (como CrearTareaController)
+     * Metodo público para actualizar completamente la vista de tareas
+     * Este metodo puede ser llamado desde otros controladores (como CrearTareaController)
      * para refrescar la interfaz después de realizar cambios en las tareas
      */
     public void actualizarVistaTareas() {
@@ -607,11 +607,15 @@ public class CalendarioController {
         usuarioActual = new Usuario("Usuario Demo", "demo@ejemplo.com", "123456");
         lblUsuario.setText("👤 Usuario: " + usuarioActual.getNombre());
 
+        // Registrar correo en SesionUsuario
+        SesionUsuario.emailActual = usuarioActual.getEmail();
+
         // Crear usuario si no existe
         if (!calendarioService.existeUsuario(usuarioActual.getEmail())) {
             calendarioService.crearUsuario(usuarioActual);
         }
     }
+
 
     private void actualizarFechaActual() {
         LocalDate hoy = LocalDate.now();

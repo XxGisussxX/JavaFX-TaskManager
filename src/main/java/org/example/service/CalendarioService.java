@@ -159,13 +159,13 @@ public class CalendarioService {
         }
 
         String sql = """
-            INSERT INTO tareas (nombre, descripcion, fecha_inicio, fecha_fin, 
-                               prioridad, estado, recordatorio, usuario_id) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """;
+        INSERT INTO tareas (nombre, descripcion, fecha_inicio, fecha_fin, 
+                           prioridad, estado, recordatorio, usuario_id) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """;
 
         try (Connection conn = conectar();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, tarea.getNombre());
             pstmt.setString(2, tarea.getDescripcion());
@@ -173,25 +173,38 @@ public class CalendarioService {
             pstmt.setDate(4, new java.sql.Date(tarea.getFechaFin().getTime()));
             pstmt.setString(5, tarea.getPrioridad().name());
             pstmt.setString(6, tarea.getEstado().name());
-            pstmt.setDate(7, tarea.getRecordatorio() != null ? new java.sql.Date(tarea.getRecordatorio().getTime()) : null);
+
+            if (tarea.getRecordatorio() != null) {
+                pstmt.setDate(7, new java.sql.Date(tarea.getRecordatorio().getTime()));
+            } else {
+                pstmt.setNull(7, Types.DATE);
+            }
+
             pstmt.setInt(8, usuarioId);
 
             int filasAfectadas = pstmt.executeUpdate();
 
             if (filasAfectadas > 0) {
-                ResultSet generatedKeys = pstmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    tarea.setId(generatedKeys.getInt(1));
+                // Obtener el último ID insertado
+                try (Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
+
+                    if (rs.next()) {
+                        tarea.setId(rs.getInt(1));
+                    }
                 }
+
                 System.out.println("✅ Tarea creada: " + tarea.getNombre());
                 return true;
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ Error al crear tarea: " + e.getMessage());
+            System.err.println("❌ Error al crear tarea en el servicio: " + e.getMessage());
         }
+
         return false;
     }
+
 
     public List<Tarea> obtenerTareas(String emailUsuario) {
         List<Tarea> tareas = new ArrayList<>();

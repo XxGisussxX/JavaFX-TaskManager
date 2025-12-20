@@ -18,7 +18,7 @@
                 <padding>
                     <Insets bottom="10.0" left="20.0" right="20.0" top="15.0" />
                 </padding>
-                <Label text="📅 Gestor de Tareas y Calendario" styleClass="main-title">
+                <Label text=" Gestor de Tareas y Calendario" styleClass="main-title">
                     <font>
                         <Font name="System Bold" size="24.0" />
                     </font>
@@ -182,6 +182,6 @@
 
     <!-- Estilos CSS -->
     <stylesheets>
-
+        <String fx:value="/styles/calendario-styles.css" />
     </stylesheets>
 </BorderPane>
